@@ -1,0 +1,72 @@
+package com.example.exno7;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.app.AlertDialog.Builder;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+public class MainActivity extends AppCompatActivity {
+EditText Rollno,Name,Marks;
+SQLiteDatabase db;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+Rollno=(EditText)findViewById(R.id.r);
+Name=(EditText)findViewById(R.id.n);
+Marks=(EditText)findViewById(R.id.m);
+// Creating database and table
+db=openOrCreateDatabase("StudentDB", Context.MODE_PRIVATE, null);
+db.execSQL("CREATE TABLE IF NOT EXISTS student(rollno VARCHAR,name VARCHAR,
+marks VARCHAR);");
+}
+public void showMessage(String title,String message) {
+Builder builder=new Builder(this);
+builder.setCancelable(true);
+builder.setTitle(title);
+builder.setMessage(message);
+builder.show();
+}
+public void Insert(android.view.View view) {
+db.execSQL("INSERT INTO student VALUES('"+Rollno.getText()+"','"+Name.getText()+
+"','"+Marks.getText()+"');");
+showMessage("Success", "Record added");
+}
+public void Delete(android.view.View view) {
+Cursor c=db.rawQuery("SELECT * FROM student WHERE rollno='"+Rollno.getText()+"'",null);
+if(c.moveToFirst()) {
+db.execSQL("DELETE FROM student WHERE rollno='"+Rollno.getText()+"'");
+showMessage("Success", "Record Deleted");
+}
+else
+showMessage("Error", "Invalid Rollno");
+}
+public void Update(android.view.View view) {
+Cursor c=db.rawQuery("SELECT * FROM student WHERE rollno='"+Rollno.getText()+"'",
+null);
+if(c.moveToFirst()) {
+db.execSQL("UPDATE student SET name='" + Name.getText() + "',marks='"
++Marks.getText() + "' WHERE rollno='"+Rollno.getText()+"'");
+showMessage("Success", "Record Modified");
+}
+else showMessage("Error", "Invalid Rollno");
+}
+public void Select(android.view.View view) {
+Cursor c=db.rawQuery("SELECT * FROM student", null);
+if(c.getCount()==0) {
+showMessage("Error", "No records found");
+return;
+}
+StringBuffer buffer=new StringBuffer();
+while(c.moveToNext()) {
+buffer.append("Rollno: "+c.getString(0)+"\n");
+buffer.append("Name: "+c.getString(1)+"\n");
+buffer.append("Marks: "+c.getString(2)+"\n\n");
+}
+showMessage("Student Details", buffer.toString());
+}
+}
